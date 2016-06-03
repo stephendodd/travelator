@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <title>Directions service</title>
+    <link rel="stylesheet" type="text/css" href="style.css"></link>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css"></link>
+  </head>
+  <body>
+    <div id="floating-panel">
+
+    <input type="text" id="start2" value="511 church street richmond melbourne"/>
+    <input type="text" id="end2" value="200 church street richmond melbourne"/>
+    <button onclick="calculateTimes()">Calculate transport times</button>
+
+    <div id="output"></div>
+    <span><i class="fa fa-male">Walking time: </i><span id="WALKING"></span></span><br/>
+    <span><i class="fa fa-bicycle">Riding time: </i><span id="BICYCLING"></span></span><br/>
+    <span><i class="fa fa-car">Driving time: </i><span id ="DRIVING"></span></span><br/>
+    <span><i class="fa fa-train">Transit time: </i><span id="TRANSIT"></span></span><br/>
+
+    </div>
+
+  <script>
+      var modes = ["WALKING", "DRIVING", "BICYCLING", "TRANSIT"];
+      var times = [];
+
+      function calculateTimes() {
+        for (var i = 0 ; i<modes.length ; i++) {
+          times[0] = initMap(modes[i])
+        }
+      }
+
+      function initMap(mode) {
+
+         var destinationA = document.getElementById('end2').value
+         var origin1 = document.getElementById('start2').value
+
+         var service = new google.maps.DistanceMatrixService;
+         service.getDistanceMatrix({
+           origins: [origin1],
+           destinations: [destinationA],
+           travelMode: google.maps.TravelMode[mode],
+           unitSystem: google.maps.UnitSystem.METRIC,
+           avoidHighways: false,
+           avoidTolls: false
+         }, function(response, status) {
+           if (status !== google.maps.DistanceMatrixStatus.OK) {
+             alert('Error was: ' + status);
+           } else {
+             var originList = response.originAddresses;
+             var destinationList = response.destinationAddresses;
+             var outputDiv = document.getElementById('output');
+             outputDiv.innerHTML = '';
+
+             for (var i = 0; i < originList.length; i++) {
+               var results = response.rows[i].elements;
+
+               for (var j = 0; j < results.length; j++) {
+
+                 outputDiv.innerHTML += originList[i] + ' to ' + destinationList[j] +
+                     ': ' + results[j].distance.text + ' in ' +
+                     results[j].duration.text + '<br>';
+               }
+             }
+           }
+
+           var walkingDiv = document.getElementById('WALKING');
+           var bicyclingDiv = document.getElementById('BICYCLING');
+           var drivingDiv = document.getElementById('DRIVING');
+           var transitDiv = document.getElementById('TRANSIT');
+           switch(mode) {
+             case "WALKING":
+              walkingDiv.innerHTML = results[0].duration.text;
+             break;
+             case "BICYCLING":
+              bicyclingDiv.innerHTML = results[0].duration.text;
+             break;
+             case "DRIVING":
+               drivingDiv.innerHTML = results[0].duration.text;
+             break;
+             case "TRANSIT":
+               transitDiv.innerHTML = results[0].duration.text;
+             break;
+             default:
+             break;
+           }
+
+         });
+
+       }
+    </script>
+
+    <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBqJeMavo2Bo_lwsUekxJyLT4UC7DgnmFQ">
+    </script>
+  </body>
+</html>
